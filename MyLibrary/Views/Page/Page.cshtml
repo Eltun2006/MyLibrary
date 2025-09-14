@@ -1,0 +1,50 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <title>Ana Səhifə</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #fdf6e3;
+        }
+        .welcome-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        .welcome-box h1 {
+            margin-bottom: 15px;
+        }
+        .welcome-box a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #6b4226;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+        .welcome-box a:hover {
+            background: #4a2d1a;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-box">
+        <h1>Xoş gəldin, @ViewBag.UserName!</h1>
+        <p>Saytımıza uğurla daxil oldun.</p>
+        <a href="/Account/Logout">Çıxış et</a>
+    </div>
+</body>
+</html>

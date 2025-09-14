@@ -1,0 +1,108 @@
+﻿@{
+    Layout = null;
+}
+
+@model User
+
+<div class="Form-Container">
+    <h2>Qeydiyyat</h2>
+
+    <form asp-action="Register" method="post" id="registerForm" novalidate>
+
+        <div class="form-group">
+            <span asp-validation-for="Username" class="error-label"></span>
+            <input asp-for="Username" class="form-input" placeholder="Adınızı daxil edin" />
+        </div>
+
+        <div class="form-group">
+            <span asp-validation-for="LastName" class="error-label"></span>
+            <input asp-for="LastName" class="form-input" placeholder="Soyadınızı daxil edin" />
+        </div>
+
+        <div class="form-group">
+            <span asp-validation-for="PasswordHash" class="error-label"></span>
+            <input asp-for="PasswordHash" class="form-input" type="password" placeholder="Şifrənizi daxil edin" />
+        </div>
+
+        <div class="form-group">
+            <span asp-validation-for="Email" class="error-label"></span>
+            <input asp-for="Email" class="form-input" type="email" placeholder="Email ünvanınızı daxil edin" />
+        </div>
+
+        <button type="submit" class="form-button">Qeydiyyatdan Keç</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    body {
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #fdf6e3;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .Form-Container {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        width: 350px;
+        text-align: center;
+    }
+
+        .Form-Container h2 {
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+    .form-group {
+        margin-bottom: 12px;
+        text-align: left;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        outline: none;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+
+        .form-input.error {
+            border-color: red;
+        }
+
+    .error-label {
+        display: block;
+        font-size: 12px;
+        color: red;
+        margin-bottom: 3px;
+    }
+
+    .form-button {
+        width: 100%;
+        padding: 10px;
+        background: #6b4226;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        margin-top: 10px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .form-button:hover {
+            background: #4a2d1a;
+        }
+</style>

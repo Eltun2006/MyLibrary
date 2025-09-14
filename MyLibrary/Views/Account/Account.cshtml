@@ -1,0 +1,65 @@
+﻿@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyLibrary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="Main-Container">
+        <h2 style="margin-bottom: 30px;">MyLibrary-ə Xoş Gəlmisiniz</h2>
+        <div class="Select">
+            <a asp-controller="Account" asp-action="Login">Login</a>
+            <a asp-controller="Account" asp-action="Register">Register</a>
+        </div>
+    </div>
+</body>
+
+<style>
+    body {
+        height: 100vh; /* ekranın tam hündürlüyü */
+        display: flex;
+        justify-content: center; /* üfüqi mərkəz */
+        align-items: center; /* şaquli mərkəz */
+        background: #fdf6e3; /* köhnə kitab səhifəsi effekti */
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .Main-Container {
+        background-color: white;
+        width: 350px;
+        height: 200px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+
+        .Main-Container a {
+            text-decoration: none;
+            color: black;
+            font-weight: 500;
+            padding: 10px;
+            background-color: lightskyblue;
+            width: 80px;
+        }
+
+            .Main-Container a:hover {
+                color: #357ab8; /* hover zamanı başqa rəng */
+                text-decoration: underline; /* üstündən keçəndə xətt çıxsın */
+            }
+
+    .Select {
+        display: flex;
+        gap: 40px;
+        justify-content: center;
+    }
+
+</style>
+</html>
