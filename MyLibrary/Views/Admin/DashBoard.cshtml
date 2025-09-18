@@ -1,83 +1,80 @@
-﻿@{
-    Layout = null;
-}
-
+﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>@ViewData["Title"]</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyLibrary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="mb-4 text-center">Admin Panel</h1>
-
-        <!-- Dashboard Cards -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card text-white bg-primary">
-                    <div class="card-body">
-                        <h5 class="card-title">İstifadəçilər</h5>
-                        <p class="card-text">Sistemdəki bütün istifadəçiləri idarə et.</p>
-                        <a href="#" class="btn btn-light btn-sm">Giriş</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-white bg-success">
-                    <div class="card-body">
-                        <h5 class="card-title">Qeydiyyatlar</h5>
-                        <p class="card-text">Yeni istifadəçilərin qeydiyyatlarını yoxla.</p>
-                        <a href="#" class="btn btn-light btn-sm">Giriş</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-white bg-warning">
-                    <div class="card-body">
-                        <h5 class="card-title">Sistem Parametrləri</h5>
-                        <p class="card-text">Tətbiq parametrlərini dəyişdir.</p>
-                        <a href="#" class="btn btn-light btn-sm">Giriş</a>
-                    </div>
-                </div>
-            </div>
+    <a asp-controller="Account" asp-action="Account" class="back-btn">Çıxış</a>
+    <div class="Main-Container">
+        <h2 style="margin-bottom: 30px;"> Xoş Gəlmisiniz</h2>
+        <div class="Select">
+            <a asp-controller="Admin" asp-action="ShowUsers">İstifadəçiləri gör</a>
+            <a>İstifadəçi əlavə et</a>
         </div>
-
-        <!-- Table of Users (Example) -->
-        <h3>İstifadəçilər Siyahısı</h3>
-        <table class="table table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Rol</th>
-                    <th>Əməliyyatlar</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>user1</td>
-                    <td>User</td>
-                    <td>
-                        <button class="btn btn-sm btn-danger">Sil</button>
-                        <button class="btn btn-sm btn-secondary">Redaktə et</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>user2</td>
-                    <td>User</td>
-                    <td>
-                        <button class="btn btn-sm btn-danger">Sil</button>
-                        <button class="btn btn-sm btn-secondary">Redaktə et</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
+<style>
+    body {
+        height: 100vh; /* ekranın tam hündürlüyü */
+        display: flex;
+        justify-content: center; /* üfüqi mərkəz */
+        align-items: center; /* şaquli mərkəz */
+        background: #fdf6e3; /* köhnə kitab səhifəsi effekti */
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .Main-Container {
+        background-color: white;
+        width: 400px;
+        height: 250px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+
+        .Main-Container a {
+            text-decoration: none;
+            color: black;
+            font-weight: 500;
+            padding: 10px;
+            background-color: lightskyblue;
+            width: 100px;
+        }
+
+            .Main-Container a:hover {
+                color: #357ab8; /* hover zamanı başqa rəng */
+                text-decoration: underline; /* üstündən keçəndə xətt çıxsın */
+            }
+
+    .Select {
+        display: flex;
+        gap: 40px;
+        justify-content: center;
+    }
+
+    .back-btn {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        padding: 10px 16px;
+        background-color: lightskyblue;
+        color: black;
+        text-decoration: none;
+        font-weight: 500;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: 0.3s;
+    }
+
+        .back-btn:hover {
+            background-color: #4aa3e0;
+            color: white;
+        }
+</style>
 </html>

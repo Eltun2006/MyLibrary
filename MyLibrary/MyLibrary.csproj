@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Views\Page\Page.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="Views\Page\Page.cshtml" />
   </ItemGroup>
 

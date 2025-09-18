@@ -17,7 +17,7 @@
           display: flex;
           justify-content: center;
           align-items: center;
-          background: #fdf6e3; /* kitab səhifəsi effekti */
+          background: #fdf6e3; 
           font-family: 'Poppins', sans-serif;
         }
 
@@ -62,6 +62,13 @@
         .Form-Container button:hover {
           background: #4a2d1a;
         }
+
+        .error-label {
+            display: block;
+            font-size: 12px;
+            color: red;
+            margin-bottom: 3px;
+        }
     </style>
 </head>
 <body>
@@ -70,13 +77,13 @@
             <div>
                 <label asp-for="Email"></label>
                 <input asp-for="Email" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+                <span asp-validation-for="Email" class="error-label"></span>
             </div>
 
             <div>
                 <label asp-for="Password">Şifrə</label>
                 <input asp-for="Password" type="password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+                <span asp-validation-for="Password" class="error-label"></span>
             </div>
 
             <button type="submit">Login</button>
@@ -85,3 +92,8 @@
     </div>
 </body>
 </html>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

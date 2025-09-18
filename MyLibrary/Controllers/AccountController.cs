@@ -9,11 +9,18 @@ namespace MyLibrary.Controllers
     public class AccountController : Controller
     {
         private readonly ApDbContext _context;
-        private const string AdminPasswordHash = "Eltun2006";
+        private readonly IConfiguration _configuration;
+        private readonly string _AdminEmail;
+        private readonly string _AdminPassword;
 
-        public AccountController(ApDbContext context)
+
+
+        public AccountController(ApDbContext context,IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+            _AdminEmail = _configuration["AppSettings:AdminEmail"];
+            _AdminPassword = _configuration["AppSettings:AdminPassword"];
         }
 
 
@@ -28,13 +35,22 @@ namespace MyLibrary.Controllers
         public IActionResult Login() => View();
 
         [HttpPost]
+        [HttpPost]
         public IActionResult Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
+            // Admin yoxlaması
+            if (model.Password == _AdminPassword && model.Email == _AdminEmail)
+            {
+                HttpContext.Session.SetString("IsAdmin", "true");
+                return RedirectToAction("Dashboard", "Admin");
+            }
+
             var user = _context.Users.FirstOrDefault(u => u.Email == model.Email &&
                                                           u.PasswordHash == ComputeHash(model.Password));
+
             if (user != null)
             {
                 // Normal istifadəçi
@@ -44,16 +60,13 @@ namespace MyLibrary.Controllers
                 return RedirectToAction("Page", "Page");
             }
 
-            // Admin yoxlaması
-            if (ComputeHash(model.Password) == AdminPasswordHash)
-            {
-                HttpContext.Session.SetString("IsAdmin", "true");
-                return RedirectToAction("Dashboard", "Admin");
-            }
 
-            ModelState.AddModelError("", "Email və ya şifrə səhvdir");
+
+            // ❌ Email və ya parol səhvdirsə
+            ModelState.AddModelError("Password", "Email və ya şifrə yalnışdır");
             return View(model);
         }
+
 
 
 
@@ -91,39 +104,11 @@ namespace MyLibrary.Controllers
             return RedirectToAction("Login");
         }
 
-        [HttpGet]
-        public IActionResult AdminCheck()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult AdminCheck(string password)
-        {
-            if (ComputeHash(password) == AdminPasswordHash)
-            {
-                // Admin login uğurlu → Admin səhifəsinə yönləndir
-                return RedirectToAction("Dashboard");
-            }
-
-            // Səhv parol olduqda
-            ModelState.AddModelError("", "Yanlış şifrə daxil etmisiniz.");
-            return View("AdminCheck");
-        }
-
-        public IActionResult Admin()
-        {
-            return View(); // admin panelin əsas səhifəsi
-        }
 
         private string ComputeHash(string input)
         {
             if (string.IsNullOrEmpty(input))
             {
-                // İstəyə görə ya exception ata bilərsən:
-                // throw new ArgumentNullException(nameof(input));
-
-                // Ya da boş string qaytara bilərsən:
                 return string.Empty;
             }
 
