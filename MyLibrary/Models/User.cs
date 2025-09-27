@@ -18,7 +18,9 @@ namespace MyLibrary.Models
     {
         [Key]
         public int Id { get; set; }
-        
+
+        public int DisplayId { get; set; }  
+
         public string Username { get; set; }
 
         

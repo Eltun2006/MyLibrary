@@ -13,7 +13,8 @@
         <h2 style="margin-bottom: 30px;"> Xoş Gəlmisiniz</h2>
         <div class="Select">
             <a asp-controller="Admin" asp-action="ShowUsers">İstifadəçiləri gör</a>
-            <a>İstifadəçi əlavə et</a>
+            <a asp-controller="Admin" asp-action="DeleteUser">İstifadəçi Sil</a>
+            <a asp-controller="Admin" asp-action="AddUserPage">İstifadəçi Əlavə et</a>
         </div>
     </div>
 </body>
@@ -30,7 +31,7 @@
 
     .Main-Container {
         background-color: white;
-        width: 400px;
+        width: 500px;
         height: 250px;
         border-radius: 10px;
         text-align: center;

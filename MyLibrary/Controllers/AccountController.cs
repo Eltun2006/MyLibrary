@@ -105,7 +105,7 @@ namespace MyLibrary.Controllers
         }
 
 
-        private string ComputeHash(string input)
+        public string ComputeHash(string input)
         {
             if (string.IsNullOrEmpty(input))
             {

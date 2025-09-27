@@ -11,8 +11,8 @@ using MyLibrary.DAL;
 namespace MyLibrary.Migrations
 {
     [DbContext(typeof(ApDbContext))]
-    [Migration("20250914200952_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250927194206_NewMigration")]
+    partial class NewMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,6 +31,9 @@ namespace MyLibrary.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()

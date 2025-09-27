@@ -36,9 +36,15 @@
                 color: white;
             }
 
+        .table-container {
+            position: relative; /* Plus düyməsi üçün reference */
+            width: 70%;
+            margin-top: 40px;
+        }
+
         table {
             border-collapse: collapse;
-            width: 70%;
+            width: 100%;
             background-color: white;
             border-radius: 12px;
             overflow: hidden;
@@ -61,7 +67,7 @@
         }
 
         tbody tr:nth-child(even) {
-            background-color: #f7faff; /* alternating row effect */
+            background-color: #f7faff;
         }
 
         tbody tr:hover {
@@ -69,57 +75,59 @@
             cursor: pointer;
         }
 
-
         .plus-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    background-color: lightgreen;
-    color: white;
-    font-size: 24px;
-    text-align: center;
-    line-height: 40px;
-    border-radius: 50%;
-    text-decoration: none;
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    transition: 0.3s;
-}
+            position: absolute;
+            bottom: -70px; /* Table-in altından bir az aşağı */
+            right: 0;
+            width: 50px;
+            height: 50px;
+            background-color: lightgreen;
+            color: white;
+            font-size: 28px;
+            text-align: center;
+            line-height: 50px;
+            border-radius: 50%;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
 
-.plus-btn:hover {
-    background-color: #4CAF50;
-}
+            .plus-btn:hover {
+                background-color: #4CAF50;
+            }
 
     </style>
 </head>
 <body>
     <a asp-controller="Admin" asp-action="DashBoard" class="back-btn">Geri</a>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Ad</th>
-                <th>Soyad</th>
-                <th>Email</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(var user in Model)
-            {
+    <div class="table-container">
+        <table>
+            <thead>
                 <tr>
-                    <td>@user.DisplayId</td>
-                    <td>@user.Username</td>
-                    <td>@user.LastName</td>
-                    <td>@user.Email</td>
+                    <th>ID</th>
+                    <th>Ad</th>
+                    <th>Soyad</th>
+                    <th>Email</th>
                 </tr>
-            }
-            
-        </tbody>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.DisplayId</td>
+                        <td>@user.Username</td>
+                        <td>@user.LastName</td>
+                        <td>@user.Email</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 
-  
-    </table>
+        <!-- Plus düyməsi table-in sağ alt küncündə -->
+        <a asp-controller="Admin" asp-action="AddUser" class="plus-btn">+</a>
+    </div>
+
 </body>
 </html>

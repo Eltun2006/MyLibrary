@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #fdf6e3; /* köhnə kitab səhifəsi effekti */
+            background: #fdf6e3;
             font-family: 'Poppins', sans-serif;
             display: flex;
             justify-content: center;
@@ -61,7 +61,7 @@
         }
 
         tbody tr:nth-child(even) {
-            background-color: #f7faff; /* alternating row effect */
+            background-color: #f7faff;
         }
 
         tbody tr:hover {
@@ -69,29 +69,19 @@
             cursor: pointer;
         }
 
+        .delete-btn {
+            background-color: #ff4d4d;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
 
-        .plus-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    background-color: lightgreen;
-    color: white;
-    font-size: 24px;
-    text-align: center;
-    line-height: 40px;
-    border-radius: 50%;
-    text-decoration: none;
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    transition: 0.3s;
-}
-
-.plus-btn:hover {
-    background-color: #4CAF50;
-}
-
+            .delete-btn:hover {
+                background-color: #cc0000;
+            }
     </style>
 </head>
 <body>
@@ -100,26 +90,25 @@
     <table>
         <thead>
             <tr>
-                <th>ID</th>
+                <th>Id</th>
                 <th>Ad</th>
-                <th>Soyad</th>
                 <th>Email</th>
+                <th>Əməliyyatlar</th>
             </tr>
         </thead>
         <tbody>
-            @foreach(var user in Model)
+            @foreach (var user in Model)
             {
                 <tr>
                     <td>@user.DisplayId</td>
                     <td>@user.Username</td>
-                    <td>@user.LastName</td>
                     <td>@user.Email</td>
+                    <td>
+                        <a asp-controller="Admin" asp-action="DeleteUser" asp-route-id="@user.Id" class="delete-btn">Sil</a>
+                    </td>
                 </tr>
             }
-            
         </tbody>
-
-  
     </table>
 </body>
 </html>
