@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyLibrary.Models
 {
@@ -34,5 +35,25 @@ namespace MyLibrary.Models
         [DataType(DataType.Password)]
         public string PasswordHash { get; set; }
 
+    }
+
+    public class Book
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public string Title { get; set; }
+
+        public byte[]? ImageData { get; set; }
+
+        public string Notes { get; set; }
+
+        public string Thoughts { get; set; }
+
+        // İstifadəçi ilə əlaqə
+        [ForeignKey("User")]
+        public int UserId { get; set; }      // Bu User.Id ilə bağlıdır
+
+        public virtual User User { get; set; } // Navigation property
     }
 }
