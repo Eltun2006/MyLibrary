@@ -1,4 +1,4 @@
-﻿@model List<MyLibrary.Models.Book>
+﻿@model List<Book>
 
 @{
     ViewBag.Title = "My Library";
@@ -6,118 +6,79 @@
 
 <style>
     body {
-        font-family: Arial, sans-serif;
+        font-family: Arial;
         margin: 0;
         padding: 0;
-        background: #fdf6e3; /* Köhnə kitab səhifəsi effekti */
+        background: #fdf6e3;
         color: #333;
     }
 
-    /* Konteyner */
     .container {
         display: flex;
         min-height: 100vh;
     }
 
-    /* Sol panel konteyneri */
     .sidebar-container {
-        position: relative;
         width: 180px;
         display: flex;
         flex-direction: column;
+        position: relative;
     }
 
-    /* Sidebar düymələr konteyneri */
     .sidebar-buttons {
+        padding: 20px;
         display: flex;
         flex-direction: column;
         gap: 15px;
-        padding: 20px;
-        background-color: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.2);
         backdrop-filter: blur(2px);
     }
 
-        /* Buttons */
         .sidebar-buttons button {
-            background: none;
-            border: none;
             padding: 10px;
-            cursor: pointer;
-            transition: 0.3s;
+            border: none;
+            background: none;
             border-radius: 5px;
+            cursor: pointer;
+            transition: .3s;
         }
 
-            /* Hover effekti düymələrdə */
             .sidebar-buttons button:hover {
-                background-color: rgba(0,0,0,0.1);
+                background: rgba(0,0,0,0.1);
             }
 
-    /* Divider (sol-sağ ayrıcı xətt) */
     .divider {
         position: absolute;
         top: 0;
         right: 0;
         width: 2px;
         height: 100%;
-        background-color: rgba(0,0,0,0.2);
-        transition: background-color 0.3s;
+        background: rgba(0,0,0,0.2);
     }
 
-    /* Hover zamanı xətt tündləşir */
-    .sidebar-buttons button:hover ~ .divider {
-        background-color: #333; /* tünd xətt */
-    }
+        .divider:hover {
+            background: #333;
+        }
 
-    /* Sağ content */
     .content {
         flex: 1;
         padding: 30px;
         overflow-y: auto;
     }
 
-    /* My Books başlığı */
-    h2 {
-        margin-top: 0;
-    }
-
-    /* AddBook düyməsi My Books altında */
-    #addBookBtn {
-        display: inline-block;
+    .book-list li {
         margin-bottom: 20px;
-        padding: 10px 15px;
-        background-color: rgba(255,255,255,0.2);
-        border: none;
+        padding: 15px;
+        background: rgba(255,255,255,0.4);
+        border-radius: 10px;
+    }
+
+    .book-list img {
+        margin-top: 5px;
         border-radius: 5px;
-        cursor: pointer;
-        transition: 0.3s;
+        width: 120px;
     }
 
-        #addBookBtn:hover {
-            border: 1px solid #333;
-            background-color: rgba(0,0,0,0.1);
-            color: #000;
-        }
-
-    /* Kitab siyahısı */
-    .book-list {
-        list-style: none;
-        padding: 0;
-    }
-
-        .book-list li {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: rgba(255, 255, 255, 0.4);
-            border-radius: 10px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
-        }
-
-        .book-list img {
-            margin-top: 5px;
-            border-radius: 5px;
-        }
-
-    /* Modal */
     #bookModal {
         display: none;
         position: fixed;
@@ -125,7 +86,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0,0,0,0.6);
+        background: rgba(0,0,0,0.6);
         justify-content: center;
         align-items: center;
         z-index: 1000;
@@ -137,37 +98,36 @@
             border-radius: 10px;
             width: 400px;
             max-width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         #bookModal input, #bookModal textarea {
             width: 100%;
             padding: 8px;
-            margin-bottom: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
-            font-size: 14px;
         }
 
         #bookModal button {
             padding: 8px 15px;
-            margin-right: 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
 
             #bookModal button[type="submit"] {
-                background-color: #333;
+                background: #333;
                 color: #fff;
             }
 
             #bookModal button#closeModal {
-                background-color: #ccc;
+                background: #ccc;
             }
 </style>
 
 <div class="container">
-    <!-- Sol panel konteyneri -->
     <div class="sidebar-container">
         <div class="sidebar-buttons">
             <h3>@ViewBag.UserName</h3>
@@ -177,49 +137,52 @@
         <div class="divider"></div>
     </div>
 
-    <!-- Sağ content -->
     <div class="content">
         <h2>My Books</h2>
         <hr>
-        <button id="addBookBtn">+ Add Book</button>
+        <button id="addBookBtn" type="submit">+ Add Book</button>
 
         <ul class="book-list">
             @foreach (var book in Model)
             {
                 <li>
-                    <strong>@book.Title</strong> <br />
-
-                    <!-- Burda ImageUrl yox, ImageData istifadə edirsən -->
-                    @if (book.ImageData != null)
+                    <strong>@book.Title</strong><br>
+                    <em>Notes:</em> @book.Notes <br>
+                    <em>Thoughts:</em> @book.Thoughts <br>
+                    @if (!string.IsNullOrEmpty(book.ImagePath))
                     {
-                        <img src="data:image/png;base64,@(Convert.ToBase64String(book.ImageData))" style="width:120px;" />
+                        <img src="@book.ImagePath" />
                     }
 
-                    <em>Notes:</em> @book.Notes <br />
-                    <em>Thoughts:</em> @book.Thoughts
+                    <div class="book-item">
+                        <form asp-action="RemoveBook" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@book.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Sil</button>
+                        </form>
+                    </div>
                 </li>
             }
+
         </ul>
 
     </div>
 </div>
 
-<!-- Modal form -->
+
 <div id="bookModal">
     <div class="modal-content">
         <h2>Add New Book</h2>
-        <form asp-action="AddBook" method="post" enctype="multipart/form-data">
+        <form asp-action="AddBook" asp-controller="Page" method="post" enctype="multipart/form-data">
             <input type="text" name="Title" placeholder="Book Title" required />
-    
-            <!-- Şəkil yükləmə -->
-            <label for="bookImage" style="cursor:pointer; color: #333; display:inline-block; margin-bottom:10px; border:1px solid #ccc; padding:8px; border-radius:5px; background-color: rgba(255,255,255,0.2);">
-                Choose or Take Photo
-            </label>
-            <input type="file" id="bookImage" name="ImageFile" accept="image/*" capture="environment" style="display:none;" />
+            <textarea name="Notes" placeholder="Notes about the book"></textarea>
+            <textarea name="Thoughts" placeholder="Your thoughts"></textarea>
 
-            <textarea name="Notes" placeholder="Notes about the book" rows="3"></textarea>
-            <textarea name="Thoughts" placeholder="Your thoughts" rows="3"></textarea>
-            <input type="hidden" name="UserId" value="@ViewBag.CurrentUserId" />
+            <label for="ImageFile">
+                <span class="placeholder">Şəkil<br>Photo/ Фото</span>
+                <img id="preview" src="" style="display:none;width:120px;margin-top:5px;" />
+            </label>
+            <input type="file" name="ImageFile" id="ImageFile" accept="image/*" />
+
             <button type="submit">Add Book</button>
             <button type="button" id="closeModal">Cancel</button>
         </form>
@@ -228,15 +191,27 @@
 </div>
 
 <script>
-    const btn = document.getElementById('addBookBtn');
-    const modal = document.getElementById('bookModal');
-    const closeBtn = document.getElementById('closeModal');
+       document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('bookModal');
+        const btnOpen = document.getElementById('addBookBtn');
+        const btnClose = document.getElementById('closeModal');
 
-    btn.addEventListener('click', () => {
-        modal.style.display = 'flex';
+        btnOpen.addEventListener('click', () => modal.style.display='flex');
+        btnClose.addEventListener('click', () => modal.style.display='none');
+
+        const fileInput = document.getElementById('ImageFile');
+        const preview = document.getElementById('preview');
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if(file){
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.style.display='block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
     });
 
-    closeBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
 </script>

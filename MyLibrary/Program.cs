@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using MyLibrary.DAL;
 using System;
 
@@ -20,6 +21,12 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;                // client javascript ilə oxuya bilməsin
     options.Cookie.IsEssential = true;             // GDPR üçün vacib
 });
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // 100 MB
+});
+
 
 var app = builder.Build();
 

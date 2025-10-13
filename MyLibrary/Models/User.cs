@@ -44,7 +44,7 @@ namespace MyLibrary.Models
 
         public string Title { get; set; }
 
-        public byte[]? ImageData { get; set; }
+        public string? ImagePath { get; set; }
 
         public string Notes { get; set; }
 

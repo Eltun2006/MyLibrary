@@ -14,47 +14,85 @@ namespace MyLibrary.Controllers
             _context = context;
         }
 
-        [HttpPost]
+        public async Task<IActionResult> Page()
+        {
+            var userIdStr = HttpContext.Session.GetString("UserId");
+
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
+            {
+                var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (currentUser != null)
+                {
+                    var myBooks = await _context.Books
+                        .Where(b => b.UserId == currentUser.Id)
+                        .ToListAsync();
+
+                    ViewBag.UserName = currentUser.Username;
+                    ViewBag.CurrentUserId = currentUser.Id;
+
+                    return View(myBooks);
+                }
+            }
+
+            return RedirectToAction("Login", "Account");
+        }
 
         [HttpPost]
-        public async Task<IActionResult> AddBook(Book model, IFormFile ImageFile)
+        public async Task<IActionResult> AddBook(Book model, IFormFile? ImageFile)
         {
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
+                return Json(new { error = "User not found" });
+
+            model.UserId = userId;
+
             if (ImageFile != null && ImageFile.Length > 0)
             {
-                using var ms = new MemoryStream();
-                await ImageFile.CopyToAsync(ms);
-                model.ImageData = ms.ToArray();
-            }
-            else
-            {
-                model.ImageData = null; // şəkil yoxdursa null saxla
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", fileName);
+
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await ImageFile.CopyToAsync(stream);
+
+                model.ImagePath = "/images/" + fileName;
             }
 
             _context.Books.Add(model);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("MyLibrary");
+            return Json(new
+            {
+                id = model.Id,
+                title = model.Title,
+                notes = model.Notes,
+                thoughts = model.Thoughts,
+                imagePath = model.ImagePath
+            });
         }
 
 
-
-        public IActionResult Page()
+        [HttpPost]
+        public async Task<IActionResult> RemoveBook(int id)
         {
-            var currentUser = _context.Users.FirstOrDefault(u => u.Email == User.Identity.Name);
-
-            if (currentUser != null)
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
             {
-                var myBooks = _context.Books
-                    .Where(b => b.UserId == currentUser.Id)
-                    .ToList();
-
-                return View(myBooks);
+                TempData["Error"] = "İstifadəçi tapılmadı!";
+                return RedirectToAction("Login", "Account");
             }
 
-            var userName = HttpContext.Session.GetString("UserName");
+            var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
+            if (book == null)
+            {
+                TempData["Error"] = "Kitab tapılmadı və ya silmək icazəniz yoxdur!";
+                return RedirectToAction("Page");
+            }
 
-            ViewBag.UserName = userName;
-            return View(new List<Book>());
+            _context.Books.Remove(book);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Kitab uğurla silindi!";
+            return RedirectToAction("Page");
         }
 
 
