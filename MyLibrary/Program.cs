@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using MyLibrary.DAL;
+using MyLibrary.Services;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,8 @@ builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = 104857600; // 100 MB
 });
+
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 var app = builder.Build();

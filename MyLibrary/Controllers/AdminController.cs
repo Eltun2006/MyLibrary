@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MyLibrary.DAL;
 using MyLibrary.Models;
 using MyLibrary.Repository;
+using MyLibrary.Services;
 
 namespace MyLibrary.Controllers
 {
@@ -11,20 +12,19 @@ namespace MyLibrary.Controllers
         private UserRepo _repo;
         private readonly ApDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
         private readonly string _AdminEmail;
         private readonly string _AdminPassword;
-        public readonly AccountController controller;
 
-
-
-        public AdminController(ApDbContext context, IConfiguration configuration)
+        // ✅ IEmailService əlavə et
+        public AdminController(ApDbContext context, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
+            _emailService = emailService;
             _AdminEmail = _configuration["AppSettings:AdminEmail"];
             _AdminPassword = _configuration["AppSettings:AdminPassword"];
             _repo = new UserRepo(configuration);
-            controller = new AccountController(context, configuration);
         }
 
         public IActionResult Dashboard()
@@ -32,31 +32,27 @@ namespace MyLibrary.Controllers
             var isAdmin = HttpContext.Session.GetString("IsAdmin");
             if (isAdmin != "true")
             {
-                // Əgər admin deyilsə login səhifəsinə yönləndir
                 return RedirectToAction("Page", "Page");
             }
-
-            return View(); // admin panel view
+            return View();
         }
 
         public IActionResult ShowUsers()
         {
             var users = _repo.ShowUsers();
-
             return View(users);
         }
 
         public IActionResult DeleteUser(int id)
         {
-            _repo.DeleteUser(id);           // istifadəçini sil
-            var users = _repo.ShowUsers();  // yenidən bütün istifadəçiləri götür
-            return View("DeleteUser", users); // ShowUsers view-ə göndər
+            _repo.DeleteUser(id);
+            var users = _repo.ShowUsers();
+            return View("DeleteUser", users);
         }
 
         public IActionResult AddUserPage()
         {
             var users = _repo.ShowUsers();
-
             return View(users);
         }
 
@@ -64,39 +60,28 @@ namespace MyLibrary.Controllers
         public IActionResult AddUser() => View();
 
         [HttpPost]
-        public IActionResult AddUser(User model)
+        public async Task<IActionResult> AddUser(User model)
         {
             if (_context.Users.Any(u => u.Email == model.Email))
             {
                 ModelState.AddModelError("Email", "Bu email artıq istifadə olunub.");
             }
 
-            // Password yoxlaması (nadir olur amma sən istədiyin üçün əlavə edirəm)
-            var hashedPassword = controller.ComputeHash(model.PasswordHash);
-
-            if (_context.Users.Any(u => u.PasswordHash == hashedPassword))
-            {
-                ModelState.AddModelError("PasswordHash", "Bu şifrə artıq istifadə olunub. Başqa şifrə seçin.");
-            }
-
-
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            _context.Users.Add(new User
-            {
-                Username = model.Username,
-                LastName = model.LastName,
-                Email = model.Email,
-                PasswordHash = controller.ComputeHash(model.PasswordHash)
-            });
-            _context.SaveChanges();
+            // ✅ Şifrə hash-lə
+            var defaultPassword = "Admin123"; // Default şifrə
+            model.PasswordHash = BCrypt.Net.BCrypt.HashPassword(defaultPassword);
+            model.IsEmailVerified = true; // Admin tərəfindən əlavə edilən istifadəçi təsdiqlənmiş sayılır
 
+            _context.Users.Add(model);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"İstifadəçi əlavə edildi. Default şifrə: {defaultPassword}";
             return RedirectToAction("ShowUsers");
         }
-
-
     }
 }

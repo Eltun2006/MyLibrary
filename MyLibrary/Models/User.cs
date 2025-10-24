@@ -31,7 +31,15 @@ namespace MyLibrary.Models
         [DataType(DataType.Password)]
         public string PasswordHash { get; set; }
 
-        // ✅ Navigation property - əlavə edin
+        // ✅ Yeni əlavələr
+        public bool IsEmailVerified { get; set; } = false;
+        public string? EmailVerificationToken { get; set; }
+        public DateTime? EmailVerificationTokenExpiry { get; set; }
+
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
+
+        // Navigation property
         public virtual ICollection<Book> Books { get; set; } = new List<Book>();
     }
 
