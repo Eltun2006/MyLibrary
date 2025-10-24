@@ -4,13 +4,29 @@
     ViewBag.Title = "My Library";
 }
 
+<html>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
 <style>
-    body {
-        font-family: Arial;
+    * {
         margin: 0;
         padding: 0;
-        background: #fdf6e3;
-        color: #333;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+    }
+
+    body {
+        font-family: 'Georgia', serif;
+        margin: 0;
+        padding: 0;
+        background: #f4ecd8 url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+        color: #3e2f1c;
+    }
+
+    h2, h3 {
+        font-family: 'Merriweather', serif;
     }
 
     .container {
@@ -19,199 +35,238 @@
     }
 
     .sidebar-container {
-        width: 180px;
+        width: 200px;
+        background: #d9c8a9;
         display: flex;
         flex-direction: column;
-        position: relative;
+        border-right: 3px solid #b69e74;
+        box-shadow: 3px 0 10px rgba(0,0,0,0.1);
     }
 
     .sidebar-buttons {
-        padding: 20px;
+        padding: 25px;
         display: flex;
         flex-direction: column;
         gap: 15px;
-        background: rgba(255,255,255,0.2);
-        backdrop-filter: blur(2px);
     }
+
+        .sidebar-buttons h3 {
+            margin-bottom: 15px;
+            color: #4b3b1f;
+            font-weight: bold;
+        }
 
         .sidebar-buttons button {
             padding: 10px;
             border: none;
-            background: none;
-            border-radius: 5px;
+            background: #f2e4c7;
+            border-radius: 6px;
             cursor: pointer;
-            transition: .3s;
+            transition: all 0.3s ease;
+            font-family: 'Georgia';
+            color: #3e2f1c;
         }
 
             .sidebar-buttons button:hover {
-                background: rgba(0,0,0,0.1);
+                background: #e0cda1;
+                transform: translateX(4px);
             }
-
-    .divider {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 2px;
-        height: 100%;
-        background: rgba(0,0,0,0.2);
-    }
-
-        .divider:hover {
-            background: #333;
-        }
 
     .content {
         flex: 1;
-        padding: 30px;
+        padding: 40px;
         overflow-y: auto;
     }
 
-    .book-list li {
-        margin-bottom: 20px;
-        padding: 15px;
-        background: rgba(255,255,255,0.4);
+    .add-book-btn {
+        display: inline-block;
+        background: #4b3b1f;
+        color: #fff8e7;
+        padding: 12px 20px;
         border-radius: 10px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: 0.3s;
+        margin-bottom: 25px;
     }
 
-    .book-list img {
-        margin-top: 5px;
-        border-radius: 5px;
-        width: 120px;
+        .add-book-btn:hover {
+            background: #5a472b;
+            transform: translateY(-2px);
+        }
+
+    .book-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 30px;
+        list-style: none;
+        padding: 0;
     }
 
-    #bookModal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.6);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-
-        #bookModal .modal-content {
-            background: rgba(255,255,255,0.95);
-            padding: 25px;
-            border-radius: 10px;
-            width: 400px;
-            max-width: 90%;
+        .book-list li {
+            background: #fffaf0;
+            border-radius: 14px;
+            box-shadow: 0 5px 14px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-        }
-
-        #bookModal input, #bookModal textarea {
-            width: 100%;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        #bookModal button {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
+            text-align: center;
             cursor: pointer;
         }
 
-            #bookModal button[type="submit"] {
-                background: #333;
-                color: #fff;
+            .book-list li:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 18px rgba(0,0,0,0.25);
             }
 
-            #bookModal button#closeModal {
-                background: #ccc;
-            }
+        .book-list img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-bottom: 3px solid #cbb98a;
+        }
+
+        .book-list strong {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #3e2f1c;
+            margin-top: 12px;
+        }
+
+    .book-details {
+        padding: 15px 18px;
+        flex: 1;
+        text-align: left;
+    }
+
+        .book-details em {
+            font-style: italic;
+            color: #6e5a3b;
+            font-weight: 600;
+        }
+
+        .book-details p {
+            margin: 5px 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    .book-item form button {
+        background: #b93e3e;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 16px;
+        cursor: pointer;
+        margin: 15px auto 12px;
+        display: inline-block;
+        font-weight: bold;
+        transition: background 0.3s;
+    }
+
+        .book-item form button:hover {
+            background: #8f2d2d;
+        }
+
+    .rating {
+        margin-top: 8px;
+    }
+
+        .rating .star {
+            font-size: 22px;
+            margin-right: 1px;
+        }
+
+        .rating .filled {
+            color: #ffbf00;
+        }
+
+        .rating .empty {
+            color: #d3c7b2;
+        }
 </style>
 
 <div class="container">
     <div class="sidebar-container">
         <div class="sidebar-buttons">
             <h3>@ViewBag.UserName</h3>
-            <button onclick="location.href='@Url.Action("Libraries", "Library")'">All Libraries</button>
-            <button onclick="location.href='@Url.Action("Login", "Account")'">Logout</button>
+            <button onclick="location.href='@Url.Action("Libraries", "Library")'">📚 All Libraries</button>
+            <button onclick="location.href='@Url.Action("Login", "Account")'">🚪 Logout</button>
         </div>
-        <div class="divider"></div>
     </div>
 
     <div class="content">
-        <h2>My Books</h2>
+        <h2>📖 My Bookshelf</h2>
         <hr>
-        <button id="addBookBtn" type="submit">+ Add Book</button>
+
+        <!-- ✅ DÜZƏLİŞ: Yeni kitab əlavə et (id olmadan) -->
+        <a href="@Url.Action("AddBook", "Page")" class="add-book-btn">+ Add Book</a>
 
         <ul class="book-list">
             @foreach (var book in Model)
             {
-                <li>
-                    <strong>@book.Title</strong><br>
-                    <em>Notes:</em> @book.Notes <br>
-                    <em>Thoughts:</em> @book.Thoughts <br>
+                <!-- ✅ DÜZƏLİŞ: Kitaba klik → Edit (id ilə) -->
+                <li class="book-card" data-book-id="@book.Id">
+
                     @if (!string.IsNullOrEmpty(book.ImagePath))
                     {
-                        <img src="@book.ImagePath" />
+                        <img src="@book.ImagePath" alt="@book.Title" />
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/260x300?text=No+Image" alt="No Image" />
                     }
 
+                    <strong>@book.Title</strong>
+
+                    <div class="book-details">
+                        <p><em>Notes:</em> @book.Notes</p>
+                        <p><em>Thoughts:</em> @book.Thoughts</p>
+
+                        <div class="rating">
+                            @{
+                                var fullStars = book.Rating;
+                                var emptyStars = 5 - fullStars;
+                            }
+                            @for (int i = 0; i < fullStars; i++)
+                            {
+                                <span class="star filled">★</span>
+                            }
+                            @for (int i = 0; i < emptyStars; i++)
+                            {
+                                <span class="star empty">☆</span>
+                            }
+                        </div>
+                    </div>
+
                     <div class="book-item">
-                        <form asp-action="RemoveBook" method="post" style="display:inline;">
+                        <!-- ✅ DÜZƏLİŞ: Sil düyməsi event propagation dayandırır -->
+                        <form asp-action="RemoveBook" method="post" onsubmit="event.stopPropagation();">
                             <input type="hidden" name="id" value="@book.Id" />
-                            <button type="submit" class="btn btn-danger btn-sm">Sil</button>
+                            <button type="submit" onclick="event.stopPropagation(); return confirm('Bu kitabı silmək istədiyinizdən əminsiniz?');">🗑 Sil</button>
                         </form>
                     </div>
                 </li>
             }
-
         </ul>
-
     </div>
 </div>
-
-
-<div id="bookModal">
-    <div class="modal-content">
-        <h2>Add New Book</h2>
-        <form asp-action="AddBook" asp-controller="Page" method="post" enctype="multipart/form-data">
-            <input type="text" name="Title" placeholder="Book Title" required />
-            <textarea name="Notes" placeholder="Notes about the book"></textarea>
-            <textarea name="Thoughts" placeholder="Your thoughts"></textarea>
-
-            <label for="ImageFile">
-                <span class="placeholder">Şəkil<br>Photo/ Фото</span>
-                <img id="preview" src="" style="display:none;width:120px;margin-top:5px;" />
-            </label>
-            <input type="file" name="ImageFile" id="ImageFile" accept="image/*" />
-
-            <button type="submit">Add Book</button>
-            <button type="button" id="closeModal">Cancel</button>
-        </form>
-
-    </div>
-</div>
+</html>
 
 <script>
-       document.addEventListener('DOMContentLoaded', () => {
-        const modal = document.getElementById('bookModal');
-        const btnOpen = document.getElementById('addBookBtn');
-        const btnClose = document.getElementById('closeModal');
-
-        btnOpen.addEventListener('click', () => modal.style.display='flex');
-        btnClose.addEventListener('click', () => modal.style.display='none');
-
-        const fileInput = document.getElementById('ImageFile');
-        const preview = document.getElementById('preview');
-        fileInput.addEventListener('change', () => {
-            const file = fileInput.files[0];
-            if(file){
-                const reader = new FileReader();
-                reader.onload = e => {
-                    preview.src = e.target.result;
-                    preview.style.display='block';
-                }
-                reader.readAsDataURL(file);
+    // ✅ Kitab kartına klikləyəndə edit səhifəsinə get
+    document.querySelectorAll('.book-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Əgər "Sil" düyməsinə klik olunubsa, redirect etmə
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                return;
             }
+
+            const bookId = this.getAttribute('data-book-id');
+            window.location.href = '@Url.Action("AddBook", "Page")?id=' + bookId;
         });
     });
-
 </script>
+</document_content>

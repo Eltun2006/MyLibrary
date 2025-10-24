@@ -11,7 +11,7 @@ using MyLibrary.DAL;
 namespace MyLibrary.Migrations
 {
     [DbContext(typeof(ApDbContext))]
-    [Migration("20251012083041_InitialCreate")]
+    [Migration("20251015074400_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -36,15 +36,15 @@ namespace MyLibrary.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
                     b.Property<string>("Thoughts")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")

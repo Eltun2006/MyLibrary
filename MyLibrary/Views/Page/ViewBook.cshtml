@@ -1,0 +1,38 @@
+﻿@model MyLibrary.Models.Book
+
+@{
+    ViewBag.Title = "View Book";
+}
+
+<h2>📖 View Book Details</h2>
+<hr />
+
+<div style="max-width: 600px; margin: auto; background: #fffaf0; padding: 20px; border-radius: 12px;">
+    <div style="text-align: center;">
+        @if (!string.IsNullOrEmpty(Model.ImagePath))
+        {
+            <img src="@Model.ImagePath" alt="@Model.Title" style="width:250px; height:350px; object-fit:cover; border-radius:10px;" />
+        }
+        else
+        {
+            <img src="https://via.placeholder.com/250x350?text=No+Image" alt="No Image" />
+        }
+    </div>
+
+    <h3 style="margin-top:15px;">📚 @Model.Title</h3>
+
+    <p><strong>Notes:</strong></p>
+    <textarea readonly style="width:100%; height:100px;">@Model.Notes</textarea>
+
+    <p><strong>Thoughts:</strong></p>
+    <textarea readonly style="width:100%; height:100px;">@Model.Thoughts</textarea>
+
+    <p><strong>Rating:</strong> @Model.Rating / 5 ⭐</p>
+
+    <div style="margin-top:20px; text-align:center;">
+        <a href="@Url.Action("AddBook", "Page", new { id = Model.Id })"
+           style="background:#4b3b1f; color:white; padding:10px 20px; border-radius:8px; text-decoration:none;">✏️ Edit</a>
+        <a href="@Url.Action("Page", "Page")"
+           style="background:#a18f6b; color:white; padding:10px 20px; border-radius:8px; text-decoration:none; margin-left:10px;">⬅️ Back</a>
+    </div>
+</div>

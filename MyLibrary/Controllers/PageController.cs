@@ -8,9 +8,11 @@ namespace MyLibrary.Controllers
     public class PageController : Controller
     {
         private readonly ApDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PageController(ApDbContext context)
+        public PageController(IWebHostEnvironment webHostEnvironment, ApDbContext context)
         {
+            _webHostEnvironment = webHostEnvironment;
             _context = context;
         }
 
@@ -37,6 +39,33 @@ namespace MyLibrary.Controllers
             return RedirectToAction("Login", "Account");
         }
 
+        // ✅ GET Metodu - Düzəldilmiş
+        [HttpGet]
+        public async Task<IActionResult> AddBook(int? id)  // ✅ int? (nullable) olmalıdır
+        {
+            if (!id.HasValue || id.Value == 0)
+            {
+                // Yeni kitab əlavə et
+                return View(new Book());
+            }
+
+            // Mövcud kitabı tap və edit et
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
+                return RedirectToAction("Login", "Account");
+
+            var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id.Value && b.UserId == userId);
+
+            if (book == null)
+            {
+                TempData["Error"] = "Kitab tapılmadı!";
+                return RedirectToAction("Page");
+            }
+
+            return View(book);
+        }
+
+        // ✅ POST Metodu
         [HttpPost]
         public async Task<IActionResult> AddBook(Book model, IFormFile? ImageFile)
         {
@@ -46,29 +75,93 @@ namespace MyLibrary.Controllers
 
             model.UserId = userId;
 
+            // 🔹 Mövcud kitabı tapırıq (update üçün)
+            var existingBook = await _context.Books.FirstOrDefaultAsync(b => b.Id == model.Id && b.UserId == userId);
+
+            // 🔹 Şəkil varsa, serverə yükləyirik
             if (ImageFile != null && ImageFile.Length > 0)
             {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", fileName);
+                // 🔹 Köhnə şəkili fiziki olaraq silmək
+                if (existingBook != null && !string.IsNullOrEmpty(existingBook.ImagePath))
+                {
+                    // Query string-i təmizlə (?v=... hissəsini sil)
+                    var oldImagePath = existingBook.ImagePath.Split('?')[0];
+                    var oldImageFullPath = Path.Combine(_webHostEnvironment.WebRootPath, oldImagePath.TrimStart('/'));
 
-                using var stream = new FileStream(filePath, FileMode.Create);
-                await ImageFile.CopyToAsync(stream);
+                    if (System.IO.File.Exists(oldImageFullPath))
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(oldImageFullPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error deleting old image: {ex.Message}");
+                        }
+                    }
+                }
 
-                model.ImagePath = "/images/" + fileName;
+                // 🔹 Yeni şəkili yüklə
+                var uploadsPath = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+                if (!Directory.Exists(uploadsPath))
+                    Directory.CreateDirectory(uploadsPath);
+
+                // Hər dəfə unikal fayl adı
+                var fileName = Guid.NewGuid() + Path.GetExtension(ImageFile.FileName);
+                var filePath = Path.Combine(uploadsPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ImageFile.CopyToAsync(stream);
+                }
+
+                // Cache-buster əlavə et
+                var timestamp = DateTime.Now.Ticks;
+                var newImagePath = $"/images/{fileName}?v={timestamp}";
+
+                // 🔹 ImagePath-i set et
+                if (existingBook != null)
+                {
+                    existingBook.ImagePath = newImagePath;
+                    existingBook.Title = model.Title;
+                    existingBook.Notes = model.Notes;
+                    existingBook.Thoughts = model.Thoughts;
+                    existingBook.Rating = model.Rating;
+
+                    _context.Books.Update(existingBook);
+                }
+                else
+                {
+                    model.ImagePath = newImagePath;
+                    _context.Books.Add(model);
+                }
+            }
+            else
+            {
+                // Şəkil yüklənməyib, yalnız mətn məlumatlarını update et
+                if (existingBook != null)
+                {
+                    existingBook.Title = model.Title;
+                    existingBook.Notes = model.Notes;
+                    existingBook.Thoughts = model.Thoughts;
+                    existingBook.Rating = model.Rating;
+                    // ImagePath toxunma, köhnəsi qalsın
+
+                    _context.Books.Update(existingBook);
+                }
+                else
+                {
+                    // Yeni kitab, şəkil yoxdur
+                    _context.Books.Add(model);
+                }
             }
 
-            _context.Books.Add(model);
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                id = model.Id,
-                title = model.Title,
-                notes = model.Notes,
-                thoughts = model.Thoughts,
-                imagePath = model.ImagePath
-            });
+            // 🔹 Redirect edərkən cache-buster əlavə et
+            return RedirectToAction("Page", new { t = DateTime.Now.Ticks });
         }
+
 
 
         [HttpPost]
@@ -93,6 +186,19 @@ namespace MyLibrary.Controllers
 
             TempData["Success"] = "Kitab uğurla silindi!";
             return RedirectToAction("Page");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ViewBook(int id)
+        {
+            var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
+            if (book == null)
+            {
+                TempData["Error"] = "Kitab tapılmadı!";
+                return RedirectToAction("Page");
+            }
+
+            return View(book);
         }
 
 

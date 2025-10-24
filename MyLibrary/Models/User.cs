@@ -19,12 +19,8 @@ namespace MyLibrary.Models
     {
         [Key]
         public int Id { get; set; }
-
-        public int DisplayId { get; set; }  
-
+        public int DisplayId { get; set; }
         public string Username { get; set; }
-
-        
         public string LastName { get; set; }
 
         [Required]
@@ -35,6 +31,8 @@ namespace MyLibrary.Models
         [DataType(DataType.Password)]
         public string PasswordHash { get; set; }
 
+        // ✅ Navigation property - əlavə edin
+        public virtual ICollection<Book> Books { get; set; } = new List<Book>();
     }
 
     public class Book
@@ -42,18 +40,29 @@ namespace MyLibrary.Models
         [Key]
         public int Id { get; set; }
 
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         public string? ImagePath { get; set; }
 
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
 
-        public string Thoughts { get; set; }
+        public int Rating { get; set; }
+
+        public string? Thoughts { get; set; }
 
         // İstifadəçi ilə əlaqə
         [ForeignKey("User")]
         public int UserId { get; set; }      // Bu User.Id ilə bağlıdır
 
         public virtual User User { get; set; } // Navigation property
+    }
+
+    public class UserLibraryViewModel
+    {
+        public int UserId { get; set; }
+        public string UserName { get; set; }
+        public string FullName { get; set; }
+        public int BookCount { get; set; }
+        public List<Book> Books { get; set; } = new List<Book>();
     }
 }
