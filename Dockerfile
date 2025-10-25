@@ -1,19 +1,21 @@
-# Base image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-
-# Build image
+# 1️⃣ Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY ["MyLibrary.csproj", "./"]
-RUN dotnet restore "MyLibrary.csproj"
+# Solution faylını kopyala və restore et
+COPY ["MyLibrary.sln", "./"]
+COPY ["MyLibrary/", "MyLibrary/"]
+RUN dotnet restore "MyLibrary/MyLibrary.csproj"
 
-COPY . .
-RUN dotnet publish "MyLibrary.csproj" -c Release -o /app/publish
+# Layihəni build et
+RUN dotnet build "MyLibrary/MyLibrary.csproj" -c Release -o /app/build
 
-FROM base AS final
+# 2️⃣ Publish stage
+FROM build AS publish
+RUN dotnet publish "MyLibrary/MyLibrary.csproj" -c Release -o /app/publish
+
+# 3️⃣ Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MyLibrary.dll"]
