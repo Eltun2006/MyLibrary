@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using MyLibrary.DAL;
-using MyLibrary.Services;
 using MyLibrary.Repository;
+using MyLibrary.Services;
+using System;
 
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -32,7 +33,27 @@ builder.Services.Configure<FormOptions>(options =>
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<UserRepo>();
 
+
+
+
 var app = builder.Build();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApDbContext>();
+        context.Database.Migrate();
+        Console.WriteLine("Migration uğurla tamamlandı!");
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Migration xətası: {Message}", ex.Message);
+    }
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
