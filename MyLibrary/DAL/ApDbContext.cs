@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MyLibrary.Models;
 
 namespace MyLibrary.DAL
@@ -12,5 +13,7 @@ namespace MyLibrary.DAL
         public DbSet<User>Users { get; set; }
 
         public DbSet<Book>Books { get; set; }
+
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
     }
 }
