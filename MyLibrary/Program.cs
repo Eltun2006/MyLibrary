@@ -10,6 +10,20 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres://"))
+{
+    // Render formatından Npgsql formatına çevir
+    var uri = new Uri(connectionString);
+    var properConnectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={uri.UserInfo.Split(':')[0]};Password={uri.UserInfo.Split(':')[1]};SSL Mode=Require;Trust Server Certificate=true";
+
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = properConnectionString;
+    connectionString = properConnectionString;
+}
+
+
+
 // ✅ UseSqlServer istifadə et (UseNpgsql DEYİL!)
 builder.Services.AddDbContext<ApDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
