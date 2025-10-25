@@ -2,48 +2,37 @@
 using Microsoft.EntityFrameworkCore;
 using MyLibrary.DAL;
 using MyLibrary.Services;
-using System;
+using MyLibrary.Repository;  // ← BU SƏTRİ ƏLAVƏ ET
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Environment variables-dan oxu (Azure-da set edəcəyik)
-var connectionString = builder.Configuration.GetConnectionString("SqlConnection")
-    ?? Environment.GetEnvironmentVariable("ConnectionStrings");
-
-
-// DbContext əlavə et
 builder.Services.AddDbContext<ApDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddDistributedMemoryCache();
 
-builder.Services.AddDistributedMemoryCache(); // Session məlumatlarını yadda saxlayacaq
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // session 30 dəqiqə sonra bitəcək
-    options.Cookie.HttpOnly = true;                // client javascript ilə oxuya bilməsin
-    options.Cookie.IsEssential = true;             // GDPR üçün vacib
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
 
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 104857600; // 100 MB
+    options.MultipartBodyLengthLimit = 104857600;
 });
 
 builder.Services.AddScoped<IEmailService, EmailService>();
-
+builder.Services.AddScoped<UserRepo>();  // ← BU SƏTRİ ƏLAVƏ ET
 
 var app = builder.Build();
 
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.UseSession();
 
 app.MapControllerRoute(

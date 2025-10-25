@@ -9,20 +9,18 @@ namespace MyLibrary.Controllers
 {
     public class AdminController : Controller
     {
-        private UserRepo _repo;
+        private readonly UserRepo _repo;
         private readonly ApDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
 
-
-        // ✅ IEmailService əlavə et
+        // ✅ UserRepo-ya ApDbContext göndər
         public AdminController(ApDbContext context, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
-
-            _repo = new UserRepo(configuration);
+            _repo = new UserRepo(context); // ← BURASI DƏYİŞDİ (IConfiguration yox, ApDbContext)
         }
 
         public IActionResult Dashboard()
@@ -71,9 +69,9 @@ namespace MyLibrary.Controllers
             }
 
             // ✅ Şifrə hash-lə
-            var defaultPassword = "Admin123"; // Default şifrə
+            var defaultPassword = "Admin123";
             model.PasswordHash = BCrypt.Net.BCrypt.HashPassword(defaultPassword);
-            model.IsEmailVerified = true; // Admin tərəfindən əlavə edilən istifadəçi təsdiqlənmiş sayılır
+            model.IsEmailVerified = true;
 
             _context.Users.Add(model);
             await _context.SaveChangesAsync();
