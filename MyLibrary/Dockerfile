@@ -1,21 +1,23 @@
-# Bu, proyektimizi build etmək üçün lazım olan SDK
+# Base image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+# Build image
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy csproj and restore
+COPY ["MyLibrary/MyLibrary.csproj", "MyLibrary/"]
+RUN dotnet restore "MyLibrary/MyLibrary.csproj"
+
+# Copy all and build
+COPY . .
+WORKDIR "/src/MyLibrary"
+RUN dotnet publish "MyLibrary.csproj" -c Release -o /app/publish
+
+# Final stage
+FROM base AS final
 WORKDIR /app
-
-# Proyekt fayllarını köçürürük
-COPY *.csproj ./
-RUN dotnet restore
-
-# Bütün kodları köçürürük
-COPY . ./
-RUN dotnet publish -c Release -o out
-
-# İndi runtime image - daha yüngül
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
-WORKDIR /app
-COPY --from=build /app/out .
-
-# Render-in istifadə edəcəyi PORT-u dinləyirik
-ENV ASPNETCORE_URLS=http://+:$PORT
-
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "MyLibrary.dll"]
