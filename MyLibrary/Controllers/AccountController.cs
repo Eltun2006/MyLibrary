@@ -11,12 +11,18 @@ namespace MyLibrary.Controllers
     {
         private readonly ApDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly string _AdminEmail;
+        private readonly string _AdminPassword;
+        private IConfiguration _configuration;
 
         // ✅ Constructor - EmailService inject et
-        public AccountController(ApDbContext context, IEmailService emailService)
+        public AccountController(ApDbContext context, IEmailService emailService, IConfiguration configuration)
         {
             _context = context;
             _emailService = emailService;
+            _configuration = configuration;
+            _AdminEmail = _configuration["AppSettings:AdminEmail"];
+            _AdminPassword = _configuration["AppSettings:AdminPassword"];
         }
 
         public IActionResult Account()
@@ -98,7 +104,7 @@ namespace MyLibrary.Controllers
             return RedirectToAction("Login");
         }
 
-        // ========== EMAIL VERIFICATION ==========
+        
         [HttpGet]
         public async Task<IActionResult> VerifyEmail(string token)
         {
@@ -130,7 +136,7 @@ namespace MyLibrary.Controllers
             return RedirectToAction("Login");
         }
 
-        // ========== LOGIN ==========
+
         [HttpGet]
         public IActionResult Login()
         {
@@ -143,34 +149,48 @@ namespace MyLibrary.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == model.Email);
 
-            if (user == null)
+            // Admin məlumatlarını yoxla
+            if (model.Email == _AdminEmail && model.Password == _AdminPassword)
             {
-                ModelState.AddModelError("", "Email və ya şifrə yanlışdır!");
-                return View(model);
-            }
+                // ✅ Admin-dirsə SESSION YARAT
+                HttpContext.Session.SetString("IsAdmin", "true");
+                HttpContext.Session.SetString("AdminEmail", model.Email);
 
-            // Email təsdiqlənibmi?
-            if (!user.IsEmailVerified)
+                TempData["Success"] = "Admin panelə xoş gəldiniz!";
+                return RedirectToAction("Dashboard", "Admin");
+            }
+            else 
             {
-                TempData["Error"] = "Email ünvanınızı təsdiqləməlisiniz! Email-inizi yoxlayın.";
-                return View(model);
+                if (user == null)
+                {
+                    ModelState.AddModelError("", "Email və ya şifrə yanlışdır!");
+                    return View(model);
+                }
+
+                // Email təsdiqlənibmi?
+                if (!user.IsEmailVerified)
+                {
+                    TempData["Error"] = "Email ünvanınızı təsdiqləməlisiniz! Email-inizi yoxlayın.";
+                    return View(model);
+                }
+
+                // Şifrəni yoxla
+                if (!BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
+                {
+                    ModelState.AddModelError("", "Email və ya şifrə yanlışdır!");
+                    return View(model);
+                }
+
+                // Session yarat
+                HttpContext.Session.SetString("UserId", user.Id.ToString());
+                HttpContext.Session.SetString("UserName", $"{user.Username} {user.LastName}");
+
+                return RedirectToAction("Page", "Page");
             }
-
-            // Şifrəni yoxla
-            if (!BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
-            {
-                ModelState.AddModelError("", "Email və ya şifrə yanlışdır!");
-                return View(model);
-            }
-
-            // Session yarat
-            HttpContext.Session.SetString("UserId", user.Id.ToString());
-            HttpContext.Session.SetString("UserName", $"{user.Username} {user.LastName}");
-
-            return RedirectToAction("Page", "Page");
         }
 
         // ========== FORGOT PASSWORD ==========

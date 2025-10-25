@@ -13,8 +13,7 @@ namespace MyLibrary.Controllers
         private readonly ApDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
-        private readonly string _AdminEmail;
-        private readonly string _AdminPassword;
+
 
         // ✅ IEmailService əlavə et
         public AdminController(ApDbContext context, IConfiguration configuration, IEmailService emailService)
@@ -22,8 +21,7 @@ namespace MyLibrary.Controllers
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
-            _AdminEmail = _configuration["AppSettings:AdminEmail"];
-            _AdminPassword = _configuration["AppSettings:AdminPassword"];
+
             _repo = new UserRepo(configuration);
         }
 

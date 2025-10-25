@@ -6,8 +6,11 @@ using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Connection string
-var connectionString = builder.Configuration.GetConnectionString("SqlConnection");
+
+// Environment variables-dan oxu (Azure-da set edəcəyik)
+var connectionString = builder.Configuration.GetConnectionString("SqlConnection")
+    ?? Environment.GetEnvironmentVariable("ConnectionStrings");
+
 
 // DbContext əlavə et
 builder.Services.AddDbContext<ApDbContext>(options =>
