@@ -4,11 +4,14 @@ using MyLibrary.DAL;
 using MyLibrary.Services;
 using MyLibrary.Repository;
 
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ✅ UseSqlServer istifadə et (UseNpgsql DEYİL!)
 builder.Services.AddDbContext<ApDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllersWithViews();
 
