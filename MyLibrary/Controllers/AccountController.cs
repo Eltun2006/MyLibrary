@@ -319,30 +319,27 @@ namespace MyLibrary.Controllers
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
 
-
         [HttpGet]
-        public async Task<IActionResult> TestEmail()
+        public async Task<IActionResult> TestEmailSend()
         {
             try
             {
-                var fromEmail = _configuration["EmailSettings:FromEmail"];
-                var password = _configuration["EmailSettings:Password"];
-                var smtpServer = _configuration["EmailSettings:SmtpServer"];
-                var port = _configuration["EmailSettings:Port"];
+                await _emailService.SendEmailAsync(
+                    "meltun4255540@gmail.com",  // Öz emailinizə göndər
+                    "Test Email - MyLibrary",
+                    "<h1>Test mesajı</h1><p>Email işləyir!</p>"
+                );
 
-                return Ok(new
-                {
-                    FromEmail = fromEmail,
-                    PasswordLength = password?.Length ?? 0,
-                    PasswordFirstChars = password?.Substring(0, Math.Min(4, password?.Length ?? 0)),
-                    SmtpServer = smtpServer,
-                    Port = port,
-                    Message = "Konfiqurasiya oxundu"
-                });
+                return Ok(new { Message = "Email uğurla göndərildi!" });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Error = ex.Message });
+                return BadRequest(new
+                {
+                    Error = ex.Message,
+                    InnerError = ex.InnerException?.Message,
+                    StackTrace = ex.StackTrace
+                });
             }
         }
     }
