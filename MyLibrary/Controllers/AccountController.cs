@@ -46,12 +46,12 @@ namespace MyLibrary.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            // Email-in real Gmail olub olmadığını yoxla
-            if (!await _emailService.IsValidEmailAsync(model.Email))
-            {
-                ModelState.AddModelError("Email", "Zəhmət olmasa real Gmail ünvanı daxil edin!");
-                return View(model);
-            }
+            //// Email-in real Gmail olub olmadığını yoxla
+            //if (!await _emailService.IsValidEmailAsync(model.Email))
+            //{
+            //    ModelState.AddModelError("Email", "Zəhmət olmasa real Gmail ünvanı daxil edin!");
+            //    return View(model);
+            //}
 
             // Email artıq qeydiyyatdan keçibmi?
             var existingUser = await _context.Users
@@ -66,42 +66,42 @@ namespace MyLibrary.Controllers
             // Şifrəni hash-lə
             model.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.PasswordHash);
 
-            // Email verification token yarat
-            model.EmailVerificationToken = GenerateToken();
-            model.EmailVerificationTokenExpiry = DateTime.Now.AddHours(24);
-            model.IsEmailVerified = false;
+            //// Email verification token yarat
+            //model.EmailVerificationToken = GenerateToken();
+            //model.EmailVerificationTokenExpiry = DateTime.Now.AddHours(24);
+            //model.IsEmailVerified = false;
 
             _context.Users.Add(model);
             await _context.SaveChangesAsync();
 
-            // Verification email göndər
-            var verificationLink = Url.Action(
-                "VerifyEmail",
-                "Account",
-                new { token = model.EmailVerificationToken },
-                Request.Scheme
-            );
+            //// Verification email göndər
+            //var verificationLink = Url.Action(
+            //    "VerifyEmail",
+            //    "Account",
+            //    new { token = model.EmailVerificationToken },
+            //    Request.Scheme
+            //);
 
-            var emailBody = $@"
-                <h2>Salam {model.Username} {model.LastName}!</h2>
-                <p>MyLibrary-ə xoş gəlmisiniz! 📚</p>
-                <p>Email ünvanınızı təsdiqləmək üçün aşağıdakı linkə klikləyin:</p>
-                <a href='{verificationLink}' style='padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;'>
-                    Email-i Təsdiqlə
-                </a>
-                <p>Link 24 saat etibarlıdır.</p>
-                <p>Əgər siz bu qeydiyyatı etməmisinizsə, bu emaili ignore edin.</p>
-            ";
+            //var emailBody = $@"
+            //    <h2>Salam {model.Username} {model.LastName}!</h2>
+            //    <p>MyLibrary-ə xoş gəlmisiniz! 📚</p>
+            //    <p>Email ünvanınızı təsdiqləmək üçün aşağıdakı linkə klikləyin:</p>
+            //    <a href='{verificationLink}' style='padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;'>
+            //        Email-i Təsdiqlə
+            //    </a>
+            //    <p>Link 24 saat etibarlıdır.</p>
+            //    <p>Əgər siz bu qeydiyyatı etməmisinizsə, bu emaili ignore edin.</p>
+            //";
 
-            try
-            {
-                await _emailService.SendEmailAsync(model.Email, "Email Təsdiqi - MyLibrary", emailBody);
-                TempData["Success"] = "Qeydiyyat uğurlu! Email ünvanınıza təsdiq linki göndərildi.";
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = $"Email göndərilmədi: {ex.Message}";
-            }
+            //try
+            //{
+            //    await _emailService.SendEmailAsync(model.Email, "Email Təsdiqi - MyLibrary", emailBody);
+            //    TempData["Success"] = "Qeydiyyat uğurlu! Email ünvanınıza təsdiq linki göndərildi.";
+            //}
+            //catch (Exception ex)
+            //{
+            //    TempData["Error"] = $"Email göndərilmədi: {ex.Message}";
+            //}
 
             return RedirectToAction("Login");
         }
@@ -173,12 +173,12 @@ namespace MyLibrary.Controllers
                     return View(model);
                 }
 
-                // Email təsdiqlənibmi?
-                if (!user.IsEmailVerified)
-                {
-                    TempData["Error"] = "Email ünvanınızı təsdiqləməlisiniz! Email-inizi yoxlayın.";
-                    return View(model);
-                }
+                //// Email təsdiqlənibmi?
+                //if (!user.IsEmailVerified)
+                //{
+                //    TempData["Error"] = "Email ünvanınızı təsdiqləməlisiniz! Email-inizi yoxlayın.";
+                //    return View(model);
+                //}
 
                 // Şifrəni yoxla
                 if (!BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
