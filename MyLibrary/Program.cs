@@ -2,12 +2,22 @@
 using Microsoft.EntityFrameworkCore;
 using MyLibrary.DAL;
 using MyLibrary.Services;
-using MyLibrary.Repository;  // ← BU SƏTRİ ƏLAVƏ ET
+using MyLibrary.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ✅ İlk öncə DATABASE_URL yoxla, sonra DefaultConnection
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+// ✅ Əgər DATABASE_URL varsa, postgresql:// formatına çevir
+if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres://"))
+{
+    connectionString = connectionString.Replace("postgres://", "postgresql://");
+}
+
 builder.Services.AddDbContext<ApDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
@@ -25,7 +35,7 @@ builder.Services.Configure<FormOptions>(options =>
 });
 
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<UserRepo>();  // ← BU SƏTRİ ƏLAVƏ ET
+builder.Services.AddScoped<UserRepo>();
 
 var app = builder.Build();
 
