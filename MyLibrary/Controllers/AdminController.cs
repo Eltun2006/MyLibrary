@@ -4,6 +4,7 @@ using MyLibrary.DAL;
 using MyLibrary.Models;
 using MyLibrary.Repository;
 using MyLibrary.Services;
+using Org.BouncyCastle.Crypto.Generators;
 
 namespace MyLibrary.Controllers
 {

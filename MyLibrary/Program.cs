@@ -1,32 +1,17 @@
-﻿using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http.Features;
+﻿using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using MyLibrary.DAL;
-using MyLibrary.Repository;
 using MyLibrary.Services;
+using MyLibrary.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ İlk öncə DATABASE_URL yoxla, sonra DefaultConnection
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
-    ?? builder.Configuration.GetConnectionString("DefaultConnection");
-
-// ✅ Əgər DATABASE_URL varsa, postgresql:// formatına çevir
-if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres://"))
-{
-    connectionString = connectionString.Replace("postgres://", "postgresql://");
-}
-
+// ✅ UseSqlServer istifadə et (UseNpgsql DEYİL!)
 builder.Services.AddDbContext<ApDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
-
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(@"/app/dataprotection-keys"))
-    .SetApplicationName("MyLibraryApp");
-
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
 
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
@@ -38,7 +23,7 @@ builder.Services.AddSession(options =>
 
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 104857600;
+    options.MultipartBodyLengthLimit = 104857600; // 100 MB
 });
 
 builder.Services.AddScoped<IEmailService, EmailService>();
