@@ -9,6 +9,8 @@
 
     <form asp-action="AddUser" method="post" id="registerForm" novalidate>
 
+        @Html.AntiForgeryToken()
+
         <div class="form-group">
             <span asp-validation-for="Username" class="error-label"></span>
             <input asp-for="Username" class="form-input" placeholder="Adınızı daxil edin" />

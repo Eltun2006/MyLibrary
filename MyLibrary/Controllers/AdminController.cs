@@ -74,6 +74,7 @@ namespace MyLibrary.Controllers
         public IActionResult AddUser() => View();
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddUser(User model)
         {
             if (_context.Users.Any(u => u.Email == model.Email))
