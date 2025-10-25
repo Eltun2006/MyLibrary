@@ -7,16 +7,12 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj and restore
-COPY ["MyLibrary/MyLibrary.csproj", "MyLibrary/"]
-RUN dotnet restore "MyLibrary/MyLibrary.csproj"
+COPY ["MyLibrary.csproj", "./"]
+RUN dotnet restore "MyLibrary.csproj"
 
-# Copy all and build
 COPY . .
-WORKDIR "/src/MyLibrary"
 RUN dotnet publish "MyLibrary.csproj" -c Release -o /app/publish
 
-# Final stage
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
