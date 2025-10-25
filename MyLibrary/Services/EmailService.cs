@@ -1,6 +1,6 @@
-﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
+﻿using SendGrid;
+using SendGrid.Helpers.Mail;
+using System.Net.Mail;
 
 namespace MyLibrary.Services
 {
@@ -25,55 +25,54 @@ namespace MyLibrary.Services
         {
             try
             {
-                _logger.LogInformation("Email göndərilir: {Email}", toEmail);
+                _logger.LogInformation("SendGrid email göndərilir: {Email}", toEmail);
 
-                // Konfiqurasiya yoxlanışı
-                var fromEmail = _config["EmailSettings:FromEmail"];
-                var password = _config["EmailSettings:Password"];
-                var smtpServer = _config["EmailSettings:SmtpServer"];
-                var port = _config["EmailSettings:Port"];
+                var apiKey = _config["SendGrid:ApiKey"];
+                var fromEmail = _config["SendGrid:FromEmail"];
+                var fromName = _config["SendGrid:FromName"] ?? "MyLibrary";
 
-                if (string.IsNullOrEmpty(fromEmail) || string.IsNullOrEmpty(password))
+                if (string.IsNullOrEmpty(apiKey))
                 {
-                    throw new Exception("Email konfiqurasiyası tapılmadı!");
+                    throw new Exception("SendGrid API Key tapılmadı! Render Environment Variables yoxlayın.");
                 }
 
-                _logger.LogInformation("SMTP Server: {Server}:{Port}, From: {From}",
-                    smtpServer, port, fromEmail);
+                _logger.LogInformation("SendGrid ApiKey: {KeyLength} simvol, From: {From}",
+                    apiKey.Length, fromEmail);
 
-                var email = new MimeMessage();
-                email.From.Add(MailboxAddress.Parse(fromEmail));
-                email.To.Add(MailboxAddress.Parse(toEmail));
-                email.Subject = subject;
+                var client = new SendGridClient(apiKey);
+                var from = new EmailAddress(fromEmail, fromName);
+                var to = new EmailAddress(toEmail);
 
-                var builder = new BodyBuilder
-                {
-                    HtmlBody = body
-                };
-                email.Body = builder.ToMessageBody();
-
-                using var smtp = new SmtpClient();
-
-                // Timeout əlavə et
-                smtp.Timeout = 30000; // 30 saniyə
-
-                await smtp.ConnectAsync(
-                    smtpServer,
-                    int.Parse(port),
-                    SecureSocketOptions.StartTls
+                var msg = MailHelper.CreateSingleEmail(
+                    from,
+                    to,
+                    subject,
+                    body,  // plain text version
+                    body   // html version
                 );
 
-                await smtp.AuthenticateAsync(fromEmail, password);
-                await smtp.SendAsync(email);
-                await smtp.DisconnectAsync(true);
+                _logger.LogInformation("SendGrid message yaradıldı, göndərilir...");
 
-                _logger.LogInformation("Email uğurla göndərildi: {Email}", toEmail);
+                var response = await client.SendEmailAsync(msg);
+
+                _logger.LogInformation("SendGrid response: {StatusCode}", response.StatusCode);
+
+                if (response.StatusCode != System.Net.HttpStatusCode.Accepted &&
+                    response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    var responseBody = await response.Body.ReadAsStringAsync();
+                    _logger.LogError("SendGrid xətası: {Status}, Body: {Body}",
+                        response.StatusCode, responseBody);
+                    throw new Exception($"SendGrid xətası: {response.StatusCode}");
+                }
+
+                _logger.LogInformation("Email uğurla göndərildi!");
             }
             catch (Exception ex)
             {
-                _logger.LogError("Email xətası: {Message}, StackTrace: {Stack}",
-                    ex.Message, ex.StackTrace);
-                throw new Exception($"Email göndərilə bilmədi: {ex.Message}", ex);
+                _logger.LogError("Email xətası: {Message}, Type: {Type}",
+                    ex.Message, ex.GetType().Name);
+                throw new Exception($"Email göndərilə bilmədi: {ex.Message}");
             }
         }
 
