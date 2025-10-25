@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Http.Features;
+﻿using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using MyLibrary.DAL;
-using MyLibrary.Services;
 using MyLibrary.Repository;
+using MyLibrary.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,13 @@ if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("post
 }
 
 builder.Services.AddDbContext<ApDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"/app/dataprotection-keys"))
+    .SetApplicationName("MyLibraryApp");
+
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
