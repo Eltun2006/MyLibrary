@@ -318,5 +318,32 @@ namespace MyLibrary.Controllers
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> TestEmail()
+        {
+            try
+            {
+                var fromEmail = _configuration["EmailSettings:FromEmail"];
+                var password = _configuration["EmailSettings:Password"];
+                var smtpServer = _configuration["EmailSettings:SmtpServer"];
+                var port = _configuration["EmailSettings:Port"];
+
+                return Ok(new
+                {
+                    FromEmail = fromEmail,
+                    PasswordLength = password?.Length ?? 0,
+                    PasswordFirstChars = password?.Substring(0, Math.Min(4, password?.Length ?? 0)),
+                    SmtpServer = smtpServer,
+                    Port = port,
+                    Message = "Konfiqurasiya oxundu"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
     }
 }
