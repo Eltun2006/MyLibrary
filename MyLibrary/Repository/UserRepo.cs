@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MyLibrary.DAL;
 using MyLibrary.Models;
 
 namespace MyLibrary.Repository
 {
-    public class UserRepo
+    public class UserRepo : IUserRepo
     {
         private readonly ApDbContext _context;
 
@@ -16,33 +15,31 @@ namespace MyLibrary.Repository
 
         public List<User> ShowUsers()
         {
+            // ✅ Əvvəl ToList() et, sonra DisplayId əlavə et
             var users = _context.Users
                 .OrderBy(u => u.Id)
-                .Select((u, index) => new User
-                {
-                    DisplayId = index + 1,
-                    Id = u.Id,
-                    Username = u.Username,
-                    LastName = u.LastName,
-                    Email = u.Email
-                })
                 .ToList();
+
+            // Memory-də DisplayId təyin et
+            for (int i = 0; i < users.Count; i++)
+            {
+                users[i].DisplayId = i + 1;
+            }
 
             return users;
         }
 
-        public List<User> DeleteUser(int id)
+        public async Task<bool> DeleteUserAsync(int id)
         {
-            var user = _context.Users.Find(id);
+            var user = await _context.Users.FindAsync(id);
             if (user != null)
             {
                 _context.Users.Remove(user);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
+                return true;  // ✅ ShowUsers() çağırma, sadəcə true/false qaytar
             }
 
-            // PostgreSQL-də IDENTITY reseed avtomatik olur, əl ilə etməyə ehtiyac yoxdur
-
-            return ShowUsers();
+            return false;
         }
     }
 }

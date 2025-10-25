@@ -1,114 +1,153 @@
-﻿@model List<User>
+﻿@model List<MyLibrary.Models.User>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cədvəl Dizayn</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background: #fdf6e3;
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+@{
+    Layout = null;
+}
 
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 10px 16px;
-            background-color: lightskyblue;
-            color: black;
-            text-decoration: none;
-            font-weight: 500;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: 0.3s;
-        }
+<div class="Form-Container">
+    <h2>İstifadəçiləri Sil</h2>
 
-            .back-btn:hover {
-                background-color: #4aa3e0;
-                color: white;
-            }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
 
-        table {
-            border-collapse: collapse;
-            width: 70%;
-            background-color: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
 
-        thead {
-            background-color: lightskyblue;
-            color: #fff;
-        }
-
-        th, td {
-            padding: 14px 20px;
-            text-align: left;
-        }
-
-        th {
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #f7faff;
-        }
-
-        tbody tr:hover {
-            background-color: #e6f2ff;
-            cursor: pointer;
-        }
-
-        .delete-btn {
-            background-color: #ff4d4d;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-
-            .delete-btn:hover {
-                background-color: #cc0000;
-            }
-    </style>
-</head>
-<body>
-    <a asp-controller="Admin" asp-action="DashBoard" class="back-btn">Geri</a>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Ad</th>
-                <th>Email</th>
-                <th>Əməliyyatlar</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model)
-            {
+    <div class="table-container">
+        <table class="user-table">
+            <thead>
                 <tr>
-                    <td>@user.DisplayId</td>
-                    <td>@user.Username</td>
-                    <td>@user.Email</td>
-                    <td>
-                        <a asp-controller="Admin" asp-action="DeleteUser" asp-route-id="@user.Id" class="delete-btn">Sil</a>
-                    </td>
+                    <th>#</th>
+                    <th>İstifadəçi Adı</th>
+                    <th>Soyad</th>
+                    <th>Email</th>
+                    <th>Əməliyyat</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-</body>
-</html>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@Model[i].Username</td>
+                        <td>@Model[i].LastName</td>
+                        <td>@Model[i].Email</td>
+                        <td>
+                            <form asp-action="DeleteUser" method="post" style="display:inline;">
+                                <input type="hidden" name="id" value="@Model[i].Id" />
+                                <button type="submit" class="delete-button"
+                                        onclick="return confirm('Bu istifadəçini silmək istədiyinizdən əminsiniz?')">
+                                    Sil
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <a asp-action="Dashboard" class="back-button">Geri Qayıt</a>
+</div>
+
+<style>
+    body {
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #fdf6e3;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .Form-Container {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        width: 800px;
+        text-align: center;
+    }
+
+        .Form-Container h2 {
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+    .alert {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .alert-success {
+        background-color: #e6f9e6;
+        color: #207520;
+    }
+
+    .alert-danger {
+        background-color: #fce4e4;
+        color: #b02a37;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+        .user-table th, .user-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .user-table th {
+            background-color: #f3f3f3;
+            font-weight: 600;
+        }
+
+    .delete-button {
+        background: #b02a37;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 13px;
+    }
+
+        .delete-button:hover {
+            background: #8b1f2b;
+        }
+
+    .back-button {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: #6b4226;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 15px;
+        transition: 0.3s;
+    }
+
+        .back-button:hover {
+            background: #4a2d1a;
+        }
+</style>

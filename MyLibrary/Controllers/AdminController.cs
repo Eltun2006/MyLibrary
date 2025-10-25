@@ -40,11 +40,28 @@ namespace MyLibrary.Controllers
             return View(users);
         }
 
-        public IActionResult DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            _repo.DeleteUser(id);
+            var deleted = await _repo.DeleteUserAsync(id);
+
+            if (deleted)
+            {
+                TempData["Success"] = "User silindi!";
+            }
+            else
+            {
+                TempData["Error"] = "User tapılmadı!";
+            }
+
+            // ✅ Eyni səhifəyə redirect et (GET DeleteUser action-ına)
+            return RedirectToAction("DeleteUser");
+        }
+
+        [HttpGet]
+        public IActionResult DeleteUser()
+        {
             var users = _repo.ShowUsers();
-            return View("DeleteUser", users);
+            return View(users);
         }
 
         public IActionResult AddUserPage()
