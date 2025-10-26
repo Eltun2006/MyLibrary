@@ -1,6 +1,7 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using System.Net.Sockets;
 
 namespace MyLibrary.Services
 {
@@ -23,53 +24,83 @@ namespace MyLibrary.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
+            var fromEmail = _config["EmailSettings:FromEmail"];
+            var password = _config["EmailSettings:Password"];
+            var smtpServer = _config["EmailSettings:SmtpServer"];
+            var portStr = _config["EmailSettings:Port"];
+
+            if (string.IsNullOrEmpty(fromEmail) || string.IsNullOrEmpty(password))
+            {
+                throw new Exception("Email konfiqurasiyası tapılmadı!");
+            }
+
+            _logger.LogInformation("=== EMAIL GÖNDƏRİLİR ===");
+            _logger.LogInformation("To: {Email}", toEmail);
+            _logger.LogInformation("From: {From}", fromEmail);
+            _logger.LogInformation("SMTP: {Server}:{Port}", smtpServer, portStr);
+
             try
             {
-                _logger.LogInformation("Brevo email göndərilir: {Email}", toEmail);
-
-                var fromEmail = _config["Brevo:FromEmail"];
-                var username = _config["Brevo:Username"];
-                var password = _config["Brevo:Password"];
-                var smtpServer = _config["Brevo:SmtpServer"];
-                var port = _config["Brevo:Port"];
-
-                if (string.IsNullOrEmpty(password))
-                {
-                    throw new Exception("Brevo SMTP Key tapılmadı!");
-                }
-
-                _logger.LogInformation("Server: {Server}:{Port}, From: {From}",
-                    smtpServer, port, fromEmail);
-
                 var email = new MimeMessage();
                 email.From.Add(MailboxAddress.Parse(fromEmail));
                 email.To.Add(MailboxAddress.Parse(toEmail));
                 email.Subject = subject;
-                email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = body };
+                email.Body = new BodyBuilder { HtmlBody = body }.ToMessageBody();
 
                 using var smtp = new SmtpClient();
-                smtp.Timeout = 30000;
 
-                _logger.LogInformation("SMTP Connect...");
+                // SSL sertifikat yoxlanışını deaktiv et
+                smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                await smtp.ConnectAsync(smtpServer, int.Parse(port), SecureSocketOptions.StartTls);
+                // Timeout və CheckCertificateRevocation
+                smtp.Timeout = 60000;
+                smtp.CheckCertificateRevocation = false;
 
-                _logger.LogInformation("SMTP Authenticate...");
+                var port = int.Parse(portStr);
 
-                await smtp.AuthenticateAsync(username, password);
+                _logger.LogInformation("Qoşulur...");
+
+                // STARTLS ilə qoşul
+                await smtp.ConnectAsync(smtpServer, port, SecureSocketOptions.StartTls);
+
+                _logger.LogInformation("✓ Qoşuldu! Capabilities: {Capabilities}", smtp.Capabilities);
+
+                _logger.LogInformation("Autentifikasiya...");
+                await smtp.AuthenticateAsync(fromEmail, password);
+
+                _logger.LogInformation("✓ Autentifikasiya OK!");
 
                 _logger.LogInformation("Email göndərilir...");
+                var result = await smtp.SendAsync(email);
 
-                await smtp.SendAsync(email);
+                _logger.LogInformation("✓ Göndərildi! Response: {Response}", result);
+
                 await smtp.DisconnectAsync(true);
 
-                _logger.LogInformation("Email uğurla göndərildi!");
+                _logger.LogInformation("=== UĞURLU ===");
+            }
+            catch (AuthenticationException authEx)
+            {
+                _logger.LogError("❌ Autentifikasiya xətası: {Message}", authEx.Message);
+                _logger.LogError("App Password düzgündürmü? {Pass}", password.Substring(0, 4) + "****");
+                throw new Exception($"Gmail autentifikasiya xətası: {authEx.Message}", authEx);
             }
             catch (Exception ex)
             {
-                _logger.LogError("Email xətası: {Message}, Type: {Type}",
-                    ex.Message, ex.GetType().Name);
-                throw new Exception($"Email göndərilə bilmədi: {ex.Message}");
+                _logger.LogError("❌ Xəta növü: {Type}", ex.GetType().Name);
+                _logger.LogError("❌ Mesaj: {Message}", ex.Message);
+                _logger.LogError("❌ InnerException: {Inner}", ex.InnerException?.Message);
+
+                if (ex.StackTrace != null)
+                {
+                    var lines = ex.StackTrace.Split('\n').Take(5);
+                    foreach (var line in lines)
+                    {
+                        _logger.LogError("  {Line}", line.Trim());
+                    }
+                }
+
+                throw;
             }
         }
 
