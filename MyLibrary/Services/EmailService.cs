@@ -1,6 +1,6 @@
-﻿using SendGrid;
-using SendGrid.Helpers.Mail;
-using System.Net.Mail;
+﻿using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
 
 namespace MyLibrary.Services
 {
@@ -25,46 +25,43 @@ namespace MyLibrary.Services
         {
             try
             {
-                _logger.LogInformation("SendGrid email göndərilir: {Email}", toEmail);
+                _logger.LogInformation("Brevo email göndərilir: {Email}", toEmail);
 
-                var apiKey = _config["SendGrid:ApiKey"];
-                var fromEmail = _config["SendGrid:FromEmail"];
-                var fromName = _config["SendGrid:FromName"] ?? "MyLibrary";
+                var fromEmail = _config["Brevo:FromEmail"];
+                var username = _config["Brevo:Username"];
+                var password = _config["Brevo:Password"];
+                var smtpServer = _config["Brevo:SmtpServer"];
+                var port = _config["Brevo:Port"];
 
-                if (string.IsNullOrEmpty(apiKey))
+                if (string.IsNullOrEmpty(password))
                 {
-                    throw new Exception("SendGrid API Key tapılmadı! Render Environment Variables yoxlayın.");
+                    throw new Exception("Brevo SMTP Key tapılmadı!");
                 }
 
-                _logger.LogInformation("SendGrid ApiKey: {KeyLength} simvol, From: {From}",
-                    apiKey.Length, fromEmail);
+                _logger.LogInformation("Server: {Server}:{Port}, From: {From}",
+                    smtpServer, port, fromEmail);
 
-                var client = new SendGridClient(apiKey);
-                var from = new EmailAddress(fromEmail, fromName);
-                var to = new EmailAddress(toEmail);
+                var email = new MimeMessage();
+                email.From.Add(MailboxAddress.Parse(fromEmail));
+                email.To.Add(MailboxAddress.Parse(toEmail));
+                email.Subject = subject;
+                email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = body };
 
-                var msg = MailHelper.CreateSingleEmail(
-                    from,
-                    to,
-                    subject,
-                    body,  // plain text version
-                    body   // html version
-                );
+                using var smtp = new SmtpClient();
+                smtp.Timeout = 30000;
 
-                _logger.LogInformation("SendGrid message yaradıldı, göndərilir...");
+                _logger.LogInformation("SMTP Connect...");
 
-                var response = await client.SendEmailAsync(msg);
+                await smtp.ConnectAsync(smtpServer, int.Parse(port), SecureSocketOptions.StartTls);
 
-                _logger.LogInformation("SendGrid response: {StatusCode}", response.StatusCode);
+                _logger.LogInformation("SMTP Authenticate...");
 
-                if (response.StatusCode != System.Net.HttpStatusCode.Accepted &&
-                    response.StatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    var responseBody = await response.Body.ReadAsStringAsync();
-                    _logger.LogError("SendGrid xətası: {Status}, Body: {Body}",
-                        response.StatusCode, responseBody);
-                    throw new Exception($"SendGrid xətası: {response.StatusCode}");
-                }
+                await smtp.AuthenticateAsync(username, password);
+
+                _logger.LogInformation("Email göndərilir...");
+
+                await smtp.SendAsync(email);
+                await smtp.DisconnectAsync(true);
 
                 _logger.LogInformation("Email uğurla göndərildi!");
             }
