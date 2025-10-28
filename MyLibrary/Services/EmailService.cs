@@ -104,17 +104,20 @@ namespace MyLibrary.Services
             }
         }
 
+
         public async Task<bool> IsValidEmailAsync(string email)
         {
-            try
+            try 
             {
                 var addr = new System.Net.Mail.MailAddress(email);
-                return addr.Address == email && email.EndsWith("@gmail.com");
+
+                return addr.Address == email;   
             }
             catch
             {
                 return false;
             }
+
         }
     }
 }

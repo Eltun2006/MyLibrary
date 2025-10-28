@@ -17,8 +17,6 @@ namespace MyLibrary.Controllers
         private readonly string _AdminEmail;
         private readonly string _AdminPassword;
         private IConfiguration _configuration;
-
-        // ✅ Constructor - EmailService inject et
         public AccountController(ApDbContext context, IEmailService emailService, IConfiguration configuration)
         {
             _context = context;
@@ -72,11 +70,6 @@ namespace MyLibrary.Controllers
             model.EmailVerificationTokenExpiry = DateTime.Now.AddHours(24);
             model.IsEmailVerified = false;
 
-            // ✅ ÖNCƏ USER-İ SAVE ET
-            _context.Users.Add(model);
-            await _context.SaveChangesAsync();
-
-            // ✅ SONRA EMAIL GÖNDƏR - TRY-CATCH İLƏ!
             try
             {
                 var verificationLink = Url.Action(
@@ -107,6 +100,9 @@ namespace MyLibrary.Controllers
                 TempData["Warning"] = $"Qeydiyyat uğurlu, lakin email göndərilə bilmədi: {ex.Message}. " +
                                       $"Təsdiq linki: {model.EmailVerificationToken}";
             }
+
+            _context.Users.Add(model);
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("Login");
         }
