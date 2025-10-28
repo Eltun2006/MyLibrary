@@ -53,7 +53,7 @@ namespace MyLibrary.Services
                 smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
                 // Timeout və CheckCertificateRevocation
-                smtp.Timeout = 60000;
+                smtp.Timeout = 120000;
                 smtp.CheckCertificateRevocation = false;
 
                 var port = int.Parse(portStr);
