@@ -61,7 +61,7 @@ namespace MyLibrary.Services
                 _logger.LogInformation("Qoşulur...");
 
                 // STARTLS ilə qoşul
-                await smtp.ConnectAsync(smtpServer, port, SecureSocketOptions.Auto);
+                await smtp.ConnectAsync(smtpServer, port, SecureSocketOptions.SslOnConnect);
 
                 _logger.LogInformation("✓ Qoşuldu! Capabilities: {Capabilities}", smtp.Capabilities);
 
