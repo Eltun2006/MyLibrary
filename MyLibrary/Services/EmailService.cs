@@ -1,9 +1,10 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 using System.Net.Sockets;
-using System.Security.Authentication;
 
 namespace MyLibrary.Services
 {
@@ -32,9 +33,7 @@ namespace MyLibrary.Services
             var portStr = _config["EmailSettings:Port"];
 
             if (string.IsNullOrEmpty(fromEmail) || string.IsNullOrEmpty(password))
-            {
                 throw new Exception("Email konfiqurasiyası tapılmadı!");
-            }
 
             _logger.LogInformation("=== EMAIL GÖNDƏRİLİR ===");
             _logger.LogInformation("To: {Email}", toEmail);
@@ -49,20 +48,18 @@ namespace MyLibrary.Services
                 email.Subject = subject;
                 email.Body = new BodyBuilder { HtmlBody = body }.ToMessageBody();
 
-                using var smtp = new SmtpClient();
+                // 👇 Burada namespace konkret göstərilib
+                using var smtp = new MailKit.Net.Smtp.SmtpClient();
 
-                // SSL sertifikat yoxlanışını deaktiv et (host-da self-signed ola bilər)
                 smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
-
                 smtp.Timeout = 120000;
                 smtp.CheckCertificateRevocation = false;
 
-                var port = int.Parse(portStr);
+                if (!int.TryParse(portStr, out int port))
+                    port = 587; // default Gmail portu
 
                 _logger.LogInformation("Qoşulur...");
-                // ✅ Dəyişiklik burada: StartTLS və 587 port
                 await smtp.ConnectAsync(smtpServer, port, SecureSocketOptions.StartTls);
-
                 _logger.LogInformation("✓ Qoşuldu! Capabilities: {Capabilities}", smtp.Capabilities);
 
                 _logger.LogInformation("Autentifikasiya...");
@@ -76,15 +73,14 @@ namespace MyLibrary.Services
                 await smtp.DisconnectAsync(true);
                 _logger.LogInformation("=== EMAIL GÖNDƏRİLDİ (UĞURLU) ===");
             }
-            catch (AuthenticationException authEx)
+            catch (MailKit.Security.AuthenticationException authEx)
             {
-                _logger.LogError("❌ Autentifikasiya xətası: {Message}", authEx.Message);
+                _logger.LogError("❌ Gmail autentifikasiya xətası: {Message}", authEx.Message);
                 throw new Exception($"Gmail autentifikasiya xətası: {authEx.Message}", authEx);
             }
             catch (SocketException sockEx)
             {
                 _logger.LogError("❌ SMTP bağlantı xətası: {Message}", sockEx.Message);
-                _logger.LogError("Render hostunda SMTP portu bağlı ola bilər.");
                 throw new Exception($"SMTP bağlantı problemi: {sockEx.Message}", sockEx);
             }
             catch (Exception ex)
