@@ -89,12 +89,8 @@ app.Use(async (context, next) =>
 
 app.UseSession();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Account}/{id?}");
-
-app.Urls.Add($"http://*:{port}");
 
 app.Run();

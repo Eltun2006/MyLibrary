@@ -1,7 +1,9 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using System.Net.Mail;
 using System.Net.Sockets;
+using System.Security.Authentication;
 
 namespace MyLibrary.Services
 {
@@ -49,77 +51,61 @@ namespace MyLibrary.Services
 
                 using var smtp = new SmtpClient();
 
-                // SSL sertifikat yoxlanışını deaktiv et
+                // SSL sertifikat yoxlanışını deaktiv et (host-da self-signed ola bilər)
                 smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                // Timeout və CheckCertificateRevocation
                 smtp.Timeout = 120000;
                 smtp.CheckCertificateRevocation = false;
 
                 var port = int.Parse(portStr);
 
                 _logger.LogInformation("Qoşulur...");
-
-                // STARTLS ilə qoşul
-                await smtp.ConnectAsync(smtpServer, port, SecureSocketOptions.SslOnConnect);
-
-                _logger.LogInformation("Port: {Port}", port);
+                // ✅ Dəyişiklik burada: StartTLS və 587 port
+                await smtp.ConnectAsync(smtpServer, port, SecureSocketOptions.StartTls);
 
                 _logger.LogInformation("✓ Qoşuldu! Capabilities: {Capabilities}", smtp.Capabilities);
 
                 _logger.LogInformation("Autentifikasiya...");
                 await smtp.AuthenticateAsync(fromEmail, password);
-
                 _logger.LogInformation("✓ Autentifikasiya OK!");
 
                 _logger.LogInformation("Email göndərilir...");
                 var result = await smtp.SendAsync(email);
-
                 _logger.LogInformation("✓ Göndərildi! Response: {Response}", result);
 
                 await smtp.DisconnectAsync(true);
-
-                _logger.LogInformation("=== UĞURLU ===");
+                _logger.LogInformation("=== EMAIL GÖNDƏRİLDİ (UĞURLU) ===");
             }
             catch (AuthenticationException authEx)
             {
                 _logger.LogError("❌ Autentifikasiya xətası: {Message}", authEx.Message);
-                _logger.LogError("App Password düzgündürmü? {Pass}", password.Substring(0, 4) + "****");
                 throw new Exception($"Gmail autentifikasiya xətası: {authEx.Message}", authEx);
+            }
+            catch (SocketException sockEx)
+            {
+                _logger.LogError("❌ SMTP bağlantı xətası: {Message}", sockEx.Message);
+                _logger.LogError("Render hostunda SMTP portu bağlı ola bilər.");
+                throw new Exception($"SMTP bağlantı problemi: {sockEx.Message}", sockEx);
             }
             catch (Exception ex)
             {
-                _logger.LogError("❌ Xəta növü: {Type}", ex.GetType().Name);
-                _logger.LogError("❌ Mesaj: {Message}", ex.Message);
-                _logger.LogError("❌ InnerException: {Inner}", ex.InnerException?.Message);
-
-                if (ex.StackTrace != null)
-                {
-                    var lines = ex.StackTrace.Split('\n').Take(5);
-                    foreach (var line in lines)
-                    {
-                        _logger.LogError("  {Line}", line.Trim());
-                    }
-                }
-
+                _logger.LogError("❌ Ümumi xəta: {Type} - {Message}", ex.GetType().Name, ex.Message);
+                _logger.LogError("StackTrace: {StackTrace}", ex.StackTrace);
                 throw;
             }
         }
 
-
         public async Task<bool> IsValidEmailAsync(string email)
         {
-            try 
+            try
             {
-                var addr = new System.Net.Mail.MailAddress(email);
-
-                return addr.Address == email;   
+                var addr = new MailAddress(email);
+                return addr.Address == email;
             }
             catch
             {
                 return false;
             }
-
         }
     }
 }

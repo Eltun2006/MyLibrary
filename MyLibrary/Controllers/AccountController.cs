@@ -56,6 +56,7 @@ namespace MyLibrary.Controllers
             var existingUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == model.Email);
 
+
             if (existingUser != null)
             {
                 ModelState.AddModelError("Email", "Bu email artıq qeydiyyatdan keçib!");
@@ -69,6 +70,9 @@ namespace MyLibrary.Controllers
             model.EmailVerificationToken = GenerateToken();
             model.EmailVerificationTokenExpiry = DateTime.Now.AddHours(24);
             model.IsEmailVerified = false;
+
+            _context.Users.Add(model);
+            await _context.SaveChangesAsync();
 
             try
             {
@@ -101,8 +105,7 @@ namespace MyLibrary.Controllers
                                       $"Təsdiq linki: {model.EmailVerificationToken}";
             }
 
-            _context.Users.Add(model);
-            await _context.SaveChangesAsync();
+
 
             return RedirectToAction("Login");
         }
